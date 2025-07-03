@@ -1,4 +1,3 @@
-cat > README.md << 'EOF'
 # Smart Task Manager (AI Powered)
 
 🔗 **Live Deployment:**  
