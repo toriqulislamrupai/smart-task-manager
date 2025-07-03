@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { Task } from "../lib/types";
 import { v4 as uuidv4 } from "uuid";
@@ -16,6 +17,7 @@ export default function TaskForm({ onAdd }: { onAdd: (task: Task) => void }) {
       title,
       description,
       status: "pending",
+      dueDate: undefined,
     };
 
     onAdd(newTask);
@@ -26,13 +28,13 @@ export default function TaskForm({ onAdd }: { onAdd: (task: Task) => void }) {
   return (
     <form onSubmit={handleSubmit} className="mb-4 space-y-2">
       <input
-        className="w-full border p-2"
+        className="w-full border p-2 rounded"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Task Title"
       />
       <textarea
-        className="w-full border p-2"
+        className="w-full border p-2 rounded"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Description"

@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'API key missing' }, { status: 500 });
   }
 
-  const prompt = `Break the task "${title}" into 3-5 actionable subtasks.`;
+  const prompt = `Break the task "${title}" into 3-5 actionable subtasks. Return only the steps.`;
 
   try {
     const res = await fetch(
@@ -23,27 +23,28 @@ export async function POST(req: NextRequest) {
     );
 
     const data = await res.json();
-
     console.log("👀 Gemini API response:", JSON.stringify(data, null, 2));
 
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    const suggestions = text
+    // Extract clean subtask lines
+    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const suggestions = rawText
       .split('\n')
-      .map((s: string) => s.replace(/^\d+\.\s*/, '').trim())
+      .map((line: string) => line.replace(/^\d+[\.\)]?\s*/, '').trim())
       .filter(Boolean);
 
-    // ✅ Add auto-dueDate (3 days from now)
-    const autoDueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+    // ✅ Generate dueDate = 3 days from now (YYYY-MM-DD)
+    const dueDate = new Date(Date.now() + 3 * 86400000)
       .toISOString()
       .split('T')[0];
 
+    // ✅ Send status & dueDate too
     return NextResponse.json({
       suggestions,
       status: suggestions.length > 0 ? 'completed' : 'pending',
-      dueDate: autoDueDate,
+      dueDate,
     });
   } catch (error) {
     console.error('🔥 Gemini API Error:', error);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
